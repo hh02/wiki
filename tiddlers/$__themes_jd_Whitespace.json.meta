@@ -1,0 +1,12 @@
+author: jd
+core-version: >=5.1.17
+created: 20210326104111883
+dependents: $:/themes/tiddlywiki/vanilla
+description: Lots of unused, negative space; an experiment on TW5 design
+list: readme config
+modified: 20210326104111884
+name: Whitespace
+plugin-type: theme
+title: $:/themes/jd/Whitespace
+type: application/json
+version: 0.0.23

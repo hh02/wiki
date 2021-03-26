@@ -1,0 +1,198 @@
+created: 20210326083326315
+modified: 20210326111542210
+tags: 
+title: rust 学习笔记
+type: text/vnd.tiddlywiki
+
+cargo build 编译
+
+cargo run 编译&&运行
+
+cargo check 不生成二进制文件
+
+carbo build --release
+
+尽量使用cargo
+
+变量的 shadow (屏蔽）： 新变量可以屏蔽旧变量
+
+变量类型：
+1. u32, i32, f32, f64(常用), bool(1byte), char(4byte)
+2. isize, usize 由计算机的架构决定
+
+tuple
+ 
+``let tuple = ( , , )``
+
+array ( vector 更灵活)
+
+```rust
+let array:[类型，长度] = [, , ]
+let a:[3;5]; 注意是分号，  a = [3, 3, 3, 3, 3]
+```
+
+rust 不允许数组越界
+
+!!! 语句和表达式
+
+```rust
+let y = {
+	let x = 3;
+	x += 5, // 这儿不能是分号，否则就是一个语句。
+}
+```
+
+语句不能为变量赋值
+
+函数的返回值：
+
+```rust
+fn five() -> i32 {
+	5
+}
+```
+
+5 + 6; 加分号后的返回值是一个空tuple, ()
+
+```rust
+if number < 5 { // 必须是 bool 类型
+	prinfln!("something");
+} else if {
+	// something
+} else {
+	// something
+}
+```
+
+if 后跟的是表达式：
+let condition = true;
+let number = if condition {5} else {6};
+分支返回类型必须相同
+
+循环
+
+```rust
+let result = loop {
+	counter += 1;
+	if counter == 10 {
+		break counter * 2;
+	}
+};
+```
+
+while number != 0 {
+}
+
+for 循环最常用
+
+```rust
+for element in a.iter() {
+	println!("the value is: {}", element);
+}
+```
+
+Range
+
+```rust
+for number in (1..4).rev() {
+	//
+}
+```
+
+!! 4. 所有权
+
+Stack vs Heap
+
+* 引用和借用
+  错误示例：
+
+1. mutable he immutalbe 在同一作用域内不能同时出现
+
+```rust
+fn main() {
+	let mut s1 = String::from("hello");
+	let s2 = &mut s1; // s1 is mutable borrowed
+	s2.push_str(", world!"); 
+	println!("{} {}", s1, s2); // s1 is immutable borrowed
+    // 去掉 s2 后不会报错， 因为 mutable borrow s2 未被使用
+}
+```
+
+2. 多个 mutable 不能在同一作用域内出现:
+
+```rust
+fn main() {
+    let mut s1 = String::from("hello");
+	let s2 = &mut s1; // first mutalbe borrow
+	s2.push_str(", world!");
+	s1.push_str(", word!"); // second mutalbe borrow
+	println!("{}", s2);
+}
+```
+
+若错误使用 borrow, 只要 borrow 未被使用就不会报错（没有 first borrow later used)。
+
+**总结：在同一个作用域内只能有一个引用对数据进行修改。**
+
+悬垂引用（Dangling References）
+
+```rust
+fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -> &String {
+    let s = String::from("hello");
+    &s
+}
+```
+
+move:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+```
+s1 移动给了 s2, s1 失效
+
+clone:
+
+
+
+拥有copy trait 可以复制
+
+引用和借用
+引用默认是不可变的， 
+在特定作用域内，对一个变量只能有一个可变引用。
+
+引用的规则总结：
+
+1. 在任意给定时间，要么 只能有一个可变引用，要么 只能有多个不可变引用。
+2. 引用必须总是有效的。
+
+### 4.3 Slices
+
+
+
+字符串切片 的字符数组必须是UTF-8边界内，否则会报错？？？？
+
+```rust
+fn first_world(s: &String) -> usize {
+	let bytes = s.as_bytes();
+	for (i, &item) in bytes.iter().enumerate() {
+		if item == b' ' {
+			return i;
+		}
+	}
+	s.len()
+}
+
+let hello = &s[..5];
+let world = &s[6..];
+let all = &s[..];
+```
+
+
+
+
+用字符串切片作为传递参数

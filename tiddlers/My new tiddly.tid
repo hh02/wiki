@@ -1,0 +1,14 @@
+created: 20210326080233659
+modified: 20210326080309970
+tags: 
+title: My new tiddly
+type: text/vnd.tiddlywiki
+
+```c
+#include <stdio.h>
+int main() {
+	return 0;
+}
+```
+
+$$\KaTeX$$
