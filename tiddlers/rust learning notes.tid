@@ -1,7 +1,7 @@
 created: 20210326083326315
-modified: 20210326111542210
+modified: 20210326152304555
 tags: 
-title: rust 学习笔记
+title: rust learning notes
 type: text/vnd.tiddlywiki
 
 cargo build 编译
@@ -170,29 +170,109 @@ clone:
 1. 在任意给定时间，要么 只能有一个可变引用，要么 只能有多个不可变引用。
 2. 引用必须总是有效的。
 
-### 4.3 Slices
+!!! 4.3 Slices
 
-
-
-字符串切片 的字符数组必须是UTF-8边界内，否则会报错？？？？
+考虑下面函数：
 
 ```rust
-fn first_world(s: &String) -> usize {
-	let bytes = s.as_bytes();
-	for (i, &item) in bytes.iter().enumerate() {
-		if item == b' ' {
-			return i;
-		}
-	}
-	s.len()
-}
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
 
-let hello = &s[..5];
-let world = &s[6..];
-let all = &s[..];
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
 ```
 
+这个函数返回了空格的位置，但这个位置只有在 `&String` 的上下文中才有意义：
+
+```rust
+fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&s); // word 的值为 5
+
+    s.clear(); // 这清空了字符串，使其等于 ""
+
+    // word 在此处的值仍然是 5，
+    // 但是没有更多的字符串让我们可以有效地应用数值 5。word 的值现在完全无效！
+}
+```
+
+解决方法：字符串 slice
+
+字符串 slice 是 ``String`` 中一部分值的引用：
+
+```rust
+let s = String::from("hello world");
+let hello = &s[0..5];
+let world = &s[6..11];
+let slice = &s[..2];
+let slice = &s[3..];
+let slice = &s[..];
+```
+
+注意：字符串 slice range 的索引必须位于有效的 UTF-8 字符边界内，如果尝试从一个多字节字符的中间位置创建字符串 slice，则程序将会因错误而退出。
+
+利用字符串 slice 重写 ``first_word``：
+
+```rust
+fn first_word(s: &str) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+```
+
+用 字符串 slice 作为参数：
+函数参数中的 ``&String`` 一般用 ``&str`` 代替， 因为这样可以同时传入 ``String`` 和 ``str`` 类型的引用。
+
+下面代码是错误的：
+
+```rust
+fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&s); // s 的不可变引用
+
+    s.clear(); // 错误! s 的可变引用
+
+    println!("the first word is: {}", word);
+}
+```
+
+在一个作用域中，不能同时出现可变和不可变引用。
+
+ 
+**字符串的字面值就是 slice**
+
+```rust
+let s = "Hello, world!";
+```
+
+这里 ``s`` 的类型是 ``&str``：它是一个指向二进制程序特定位置的 slice， 是不可变引用。
+
+!!!! 其他类型的 slice
+
+```rust
+let a = [1, 2, 3, 4, 5];
+
+let slice = &a[1..3];
+```
+
+!!!! 我的观点
+
+字符串 slice 的类型就是一个 ``str`` 引用， 只是比 ``String`` 引用少了 ``capacity``。
 
 
-
-用字符串切片作为传递参数
+[img width=360 [2021-03-26-rust-4-3-slice01.svg]]
